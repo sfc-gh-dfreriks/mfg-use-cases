@@ -33,7 +33,7 @@ All data is **synthetic**. Supplier risk, sanctions, ESG, sub-tier and PPI figur
 | Third party | always | D&B-style financial risk, sanctions / adverse media, EcoVadis-style ESG, Resilinc-style sub-tier risk, PPI indices, FX |
 
 Every SAP instance is generated once as business events and rendered into all four SAP formats, so **totals reconcile exactly** whichever SAP type
-is chosen ($953,682,927 of SAP spend in each case). Real coverage gaps from the playbook gap analysis are kept: SAP BDC has no goods receipts or PO
+is chosen: the dbt test `assert_sap_po_value_reconciles` checks it on every build (`tools/spend_risk_facts.py` reports the current total). Real coverage gaps from the playbook gap analysis are kept: SAP BDC has no goods receipts or PO
 pricing conditions, SAP BW has no pricing conditions or cash-discount detail, Coupa invoices are header-level, and the acquired ERPs carry no
 contracts. See [`docs/source_mapping.md`](docs/source_mapping.md).
 
@@ -51,6 +51,22 @@ contracts. See [`docs/source_mapping.md`](docs/source_mapping.md).
 10. **Data Sources**: choose the system type behind each instance, turn sources on and off, preview native tables, see per-object coverage,
    and **Apply**, which runs `dbt build` with the selection.
 11. **Sources & Lineage (dbt)**: the dbt DAG from the manifest, per canonical object, with unselected adapters greyed out.
+
+## Public demo and presales kit
+
+- **Public demo:** https://sfc-gh-dfreriks.github.io/mfg-multi-erp-spend-public/ ([repo](https://github.com/sfc-gh-dfreriks/mfg-multi-erp-spend-public)).
+  It's a read-only static snapshot built with `VITE_STATIC=1`:
+  - The scenario model runs in the browser (`client/src/lib/scenario.ts`).
+  - Cortex answers are pre-generated for the suggested questions, together with all remedy plans and one recommendation.
+  - Snapshots are baked by `app/scripts/export-static.mjs` from the running local server.
+- **Presales kit:** `~/Documents/SAP/Multi_ERP_Spend_Presales_Kit/`. It holds six DOCX files, `00_Presales_Overview.pptx`,
+  `Multi_ERP_Spend_Demo.pptx`, `Multi_ERP_Spend_Walkthrough.mp4` and the screenshots.
+- **Regenerate,** with the local app running:
+  1. `python3 tools/spend_risk_facts.py` writes `/tmp/mfg_spend_facts.json`. Every number in the kit comes from this file.
+  2. `python3 tools/build_presales_kit.py` and `python3 tools/build_decks.py` rebuild the documents and decks.
+  3. `python3 tools/update_catalog.py` updates the consolidated use-case catalog.
+  4. Screenshots: run `tools/capture_shots.py --app mfg_spend` from `sap-bdc-finance-360`.
+  5. Video: run `tools/video/build.py --domain mfg_spend`, also from `sap-bdc-finance-360`.
 
 ## Supplier optimization
 

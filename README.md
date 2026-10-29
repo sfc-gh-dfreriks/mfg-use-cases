@@ -11,7 +11,7 @@ See [framework/docs/FRAMEWORK.md](framework/docs/FRAMEWORK.md) for the pattern, 
 
 | # | Use case | Playbook role | Business question | Status |
 |---|---|---|---|---|
-| 01 | [Multi-ERP Spend & Supplier Risk](use_cases/01_multi_erp_spend/) | Land | What is my global spend by supplier, and where do prices vary across plants? | **Built**: `MFG_SPEND_RISK`, app on 5188 |
+| 01 | [Multi-ERP Spend & Supplier Risk](use_cases/01_multi_erp_spend/) | Land | What is my global spend by supplier, and where do prices vary across plants? | **Published**: `MFG_SPEND_RISK`, app on 5188, [public demo](https://sfc-gh-dfreriks.github.io/mfg-multi-erp-spend-public/), presales kit |
 | 02 | SAP BW/HANA Modernization | Anchor | Month-end reports crawl and IT has a report backlog. What does staying on HANA cost us? | Planned |
 | 03 | Connected Asset Health / OEE | Land | How much revenue does unplanned downtime cost us, and which assets fail next? | Planned |
 | 04 | AI Sales & Customer Intelligence | Expand | Which accounts will churn in 90 days? Give me a pre-call brief for tomorrow. | Planned |

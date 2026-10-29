@@ -129,6 +129,9 @@ router.get("/api/optimize/baseline", handle(async (req) => {
   };
 }));
 
+// Raw model inputs, baked by scripts/export-static.mjs so the public build can simulate in the browser.
+router.get("/api/optimize/inputs", handle(loadBase));
+
 router.post("/api/optimize/simulate", handle(async (req) => simulate(await loadBase(req), clampLevers(req.body?.levers))));
 
 router.get("/api/optimize/issues", handle(async (req) => {

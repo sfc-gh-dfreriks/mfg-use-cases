@@ -1,0 +1,78 @@
+{
+  "pages": {
+    "overview": {
+      "topic": "overview",
+      "suggestions": [
+        "Which company and ERP drive most of our spend?",
+        "How has spend trended by quarter?"
+      ]
+    },
+    "suppliers": {
+      "topic": "suppliers",
+      "suggestions": [
+        "Is our supplier base too concentrated?",
+        "Which top suppliers have low contract coverage?"
+      ]
+    },
+    "price-variance": {
+      "topic": "price",
+      "suggestions": [
+        "Which plant pays the most above the best price?",
+        "Where is price variance not explained by commodity indices?"
+      ]
+    },
+    "supplier-risk": {
+      "topic": "risk",
+      "suggestions": [
+        "Which high-spend suppliers are the biggest risk?",
+        "How exposed are we to single-source sub-tier suppliers?"
+      ]
+    },
+    "supplier-optimization": {
+      "topic": "optimize",
+      "suggestions": [
+        "Which three actions would save the most without adding supply risk?",
+        "Where should we consolidate suppliers, and where should we dual-source instead?"
+      ]
+    },
+    "contracts": {
+      "topic": "contracts",
+      "suggestions": [
+        "Where is maverick spend highest?",
+        "Which suppliers should we put under contract first?"
+      ]
+    },
+    "match-payments": {
+      "topic": "match",
+      "suggestions": [
+        "Where are three-way match exceptions concentrated?",
+        "How much early-payment discount are we losing?"
+      ]
+    },
+    "golden-record": {
+      "topic": "golden",
+      "suggestions": [
+        "How reliable is the supplier deduplication?",
+        "Which suppliers do we buy from in several ERPs?"
+      ]
+    },
+    "data-sources": {
+      "topic": "sources",
+      "suggestions": [
+        "What does each selected ERP contribute?",
+        "What do we lose by reading SAP from BDC instead of S/4HANA?"
+      ]
+    }
+  },
+  "askCortexPage": {
+    "topic": "general",
+    "suggestions": [
+      "What is our global spend by supplier, and where do prices vary across plants?",
+      "Which suppliers do we buy from in several ERPs, and where could we consolidate?",
+      "Which high-spend suppliers carry the most risk?",
+      "How much maverick spend do the acquired companies add?",
+      "Where are we losing early-payment discounts?",
+      "What would we lose by reading SAP from BDC instead of S/4HANA tables?"
+    ]
+  }
+}

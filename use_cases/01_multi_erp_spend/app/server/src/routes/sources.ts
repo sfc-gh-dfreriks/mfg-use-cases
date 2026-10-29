@@ -68,7 +68,7 @@ router.get("/api/sources/preview", handle(async (req) => {
   const system = String(req.query.system ?? "");
   const slot = String(req.query.slot ?? "");
   const sys = SYSTEMS[system];
-  if (!sys || !/^[A-Z_]{2,20}$/.test(slot)) throw new Error("unknown source");
+  if (!sys || !/^[A-Z0-9_]{2,20}$/.test(slot)) throw new Error("unknown source");
   const schema = sys.schema(slot);
   const tables = await runQuery(`SELECT TABLE_NAME, ROW_COUNT FROM ${DB}.INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? ORDER BY TABLE_NAME`, [schema]);
   const sample = await runQuery(`SELECT * FROM ${DB}.${schema}.${sys.poTable} LIMIT 5`);

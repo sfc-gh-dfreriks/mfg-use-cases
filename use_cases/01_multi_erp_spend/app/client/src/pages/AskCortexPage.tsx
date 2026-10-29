@@ -1,14 +1,8 @@
 import { Sparkles } from 'lucide-react';
 import AskCortex from '@/components/AskCortex';
+import ASK_TOPICS from '@/ask_topics.json';
 
-const SUGGESTIONS = [
-  'What is our global spend by supplier, and where do prices vary across plants?',
-  'Which suppliers do we buy from in several ERPs, and where could we consolidate?',
-  'Which high-spend suppliers carry the most risk?',
-  'How much maverick spend do the acquired companies add?',
-  'Where are we losing early-payment discounts?',
-  'What would we lose by reading SAP from BDC instead of S/4HANA tables?',
-];
+const SUGGESTIONS = ASK_TOPICS.askCortexPage.suggestions;
 
 export default function AskCortexPage() {
   return (

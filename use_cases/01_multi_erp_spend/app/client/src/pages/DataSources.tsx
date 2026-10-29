@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Database, Play, Loader2, CheckCircle2, XCircle, Eye, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@/hooks/useQuery';
 import { useFilters } from '@/hooks/useFilters';
-import { fetchSources, fetchSourcePreview, fetchJob, applySelection } from '@/lib/api';
+import { fetchSources, fetchSourcePreview, fetchJob, applySelection, STATIC } from '@/lib/api';
 import { formatNumber, cn } from '@/lib/utils';
 import ChartCard from '@/components/ChartCard';
 import PageState from '@/components/PageState';
@@ -150,12 +150,13 @@ export default function DataSources() {
         </ChartCard>
 
         <div className="sticky bottom-4 z-10 flex items-center gap-4 rounded-xl border border-gray-200 bg-white/95 p-4 shadow-lg backdrop-blur">
-          <button onClick={apply} disabled={!dirty || running}
+          <button onClick={apply} disabled={STATIC || !dirty || running}
             className="flex items-center gap-2 rounded-lg bg-sf-primary px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-sf-dark disabled:cursor-not-allowed disabled:opacity-40">
             {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} {running ? 'Rebuilding…' : 'Apply and rebuild'}
           </button>
           <div className="text-sm text-gray-600">
-            {running ? 'dbt build is running: staging adapters are unchanged; silver, gold and tests are rebuilt.'
+            {STATIC ? 'Public demo: you can browse each source type and preview its native tables. Switching sources runs dbt in Snowflake, so it needs the full deployment.'
+              : running ? 'dbt build is running: staging adapters are unchanged; silver, gold and tests are rebuilt.'
               : dirty ? 'Selection changed. Apply to rebuild the silver and gold layers.' : 'The dashboards reflect this selection.'}
           </div>
           {job?.status === 'done' && !running && <span className="ml-auto flex items-center gap-1 text-sm text-emerald-700"><CheckCircle2 className="h-4 w-4" />{job.summary}</span>}

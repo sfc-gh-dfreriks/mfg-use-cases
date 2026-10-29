@@ -13,19 +13,12 @@ import MatchPayments from '@/pages/MatchPayments';
 import GoldenRecord from '@/pages/GoldenRecord';
 import DataSources from '@/pages/DataSources';
 import Lineage from '@/pages/Lineage';
+import ASK_TOPICS from '@/ask_topics.json';
+import { STATIC } from '@/lib/api';
 
 // Ask Cortex: per-page topic (server TOPICS in routes/askCortex.ts) + suggested questions.
-const ASK: Record<string, { topic: string; suggestions: string[] }> = {
-  overview: { topic: 'overview', suggestions: ['Which company and ERP drive most of our spend?', 'How has spend trended by quarter?'] },
-  suppliers: { topic: 'suppliers', suggestions: ['Is our supplier base too concentrated?', 'Which top suppliers have low contract coverage?'] },
-  'price-variance': { topic: 'price', suggestions: ['Which plant pays the most above the best price?', 'Where is price variance not explained by commodity indices?'] },
-  'supplier-risk': { topic: 'risk', suggestions: ['Which high-spend suppliers are the biggest risk?', 'How exposed are we to single-source sub-tier suppliers?'] },
-  'supplier-optimization': { topic: 'optimize', suggestions: ['Which three actions would save the most without adding supply risk?', 'Where should we consolidate suppliers, and where should we dual-source instead?'] },
-  contracts: { topic: 'contracts', suggestions: ['Where is maverick spend highest?', 'Which suppliers should we put under contract first?'] },
-  'match-payments': { topic: 'match', suggestions: ['Where are three-way match exceptions concentrated?', 'How much early-payment discount are we losing?'] },
-  'golden-record': { topic: 'golden', suggestions: ['How reliable is the supplier deduplication?', 'Which suppliers do we buy from in several ERPs?'] },
-  'data-sources': { topic: 'sources', suggestions: ['What does each selected ERP contribute?', 'What do we lose by reading SAP from BDC instead of S/4HANA?'] },
-};
+// Shared with scripts/export-static.mjs, which bakes an answer for each one for the public build.
+const ASK: Record<string, { topic: string; suggestions: string[] }> = ASK_TOPICS.pages;
 
 const PAGE_COMPONENTS: Record<PageId, React.FC<{ onNavigate?: (p: PageId) => void }>> = {
   'ask-cortex': AskCortexPage,
@@ -55,6 +48,12 @@ function AppShell() {
           <Icon className="h-6 w-6 text-sf-primary" />
           <h1 className="text-2xl font-bold text-sf-deeper">{navItem.label}</h1>
         </div>
+        {STATIC && (
+          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">
+            Public demo: a read-only snapshot of synthetic data (SAP A = ECC, SAP B = S/4HANA, all non-SAP sources on). Filters show an exact company
+            selection, or all/one company with one category. Cortex answers are pre-generated for the suggested questions; the scenario model runs in your browser.
+          </div>
+        )}
         {ASK[activePage] && (
           <div className="mb-6">
             <AskCortex key={`${activePage}-${dataVersion}`} topic={ASK[activePage].topic}
