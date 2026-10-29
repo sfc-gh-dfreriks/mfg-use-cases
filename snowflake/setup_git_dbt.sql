@@ -3,6 +3,9 @@
 --
 -- 1. MFG_ADMIN.GIT: secret + API integration + Git repository object for the
 --    private GitHub repo, shared by every use case.
+--    (Until the GitHub secret exists, deploy from a stage instead:
+--     python3 framework/tools/deploy_dbt.py use_cases/<NN_name> <DB>.CONFIG.<NAME>_DBT
+--     That is how MULTI_ERP_SPEND_DBT is deployed today. Switching to Git later only needs ADD VERSION FROM the repo.)
 -- 2. One dbt project object per use case, deployed from the repo, run with
 --    EXECUTE DBT PROJECT (the app's Data Sources page uses this when
 --    DBT_EXECUTION=snowflake).

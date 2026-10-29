@@ -25,7 +25,7 @@ All data in this repo is **synthetic**. Third-party risk, ESG, sanctions and ind
 ## Layout
 
 ```
-framework/        shared pattern: docs, dbt macros, Snowflake helper, new-use-case scaffold
+framework/        shared pattern: docs, dbt macros, Snowflake helper (sf.py), new-use-case scaffold, dbt deploy
 snowflake/        one-time Snowflake setup: Git repository object, dbt project objects, tasks
 use_cases/NN_*/   one folder per use case (data_gen, dbt, sql, app, tools, docs)
 ```
@@ -52,6 +52,14 @@ CREATE DATABASE IF NOT EXISTS MFG_ADMIN; CREATE SCHEMA IF NOT EXISTS MFG_ADMIN.G
 CREATE OR REPLACE SECRET MFG_ADMIN.GIT.GITHUB_PAT TYPE = PASSWORD USERNAME = '<github user>' PASSWORD = '<token>';
 ```
 
-Then run [`snowflake/setup_git_dbt.sql`](snowflake/setup_git_dbt.sql). It creates the API integration, the Git repository object
+Then run [`snowflake/setup_git_dbt.sql`](snowflake/setup_git_dbt.sql).
+
+Until that secret exists, deploy a use case's dbt project from a stage instead. No Git credentials are needed:
+
+```bash
+python3 framework/tools/deploy_dbt.py use_cases/01_multi_erp_spend MFG_SPEND_RISK.CONFIG.MULTI_ERP_SPEND_DBT
+```
+
+This is how `MULTI_ERP_SPEND_DBT` is deployed today (dbt 1.12.3, stage `@MFG_ADMIN.DBT.PROJECTS`). It creates the API integration, the Git repository object
 `MFG_ADMIN.GIT.MFG_USE_CASES` and one dbt project object per use case. Each use case runs inside Snowflake with
 `EXECUTE DBT PROJECT`, and its app can use that path with `DBT_EXECUTION=snowflake`.

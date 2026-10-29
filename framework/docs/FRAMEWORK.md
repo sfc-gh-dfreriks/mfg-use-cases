@@ -46,8 +46,8 @@ use_cases/NN_<name>/
   docs/                     source_mapping.md (generated) and design notes
 ```
 
-Shared pieces live in `framework/`: `tools/sf.py` (Snowflake helper), `dbt_macros/` (schema naming, selection union) and
-`tools/new_use_case.py` (scaffold).
+Shared pieces live in `framework/`: `tools/sf.py` (Snowflake helper), `dbt_macros/` (schema naming, selection union),
+`tools/new_use_case.py` (scaffold) and `tools/deploy_dbt.py` (deploy a use case's dbt project object from a stage).
 
 ## Adding a use case
 
@@ -58,7 +58,8 @@ Shared pieces live in `framework/`: `tools/sf.py` (Snowflake helper), `dbt_macro
 4. Define one adapter per source system in `tools/build_silver_sql.py`, then run it.
 5. Build the silver helpers and gold marts, plus a reconciliation test.
 6. Write the semantic view, agent and app pages (copy `use_cases/01_multi_erp_spend/app` and replace the pages).
-7. Add a `CREATE DBT PROJECT` block to `snowflake/setup_git_dbt.sql`, and add a row to the root README index.
+7. Deploy the dbt project object (`framework/tools/deploy_dbt.py`, or a `CREATE DBT PROJECT` block in `snowflake/setup_git_dbt.sql`
+   once the Git repository object exists), and add a row to the root README index.
 
 ## Running dbt
 

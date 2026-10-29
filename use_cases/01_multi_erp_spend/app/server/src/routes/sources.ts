@@ -14,9 +14,13 @@ const DB = "MFG_SPEND_RISK";
 const DBT_DIR = path.resolve(process.env.DBT_PROJECT_DIR ?? path.join(import.meta.dirname, "../../../../dbt"));
 // Where Apply runs dbt: "local" uses the dbt CLI from the repo's shared virtualenv; "snowflake" runs the
 // deployed dbt project object with EXECUTE DBT PROJECT (see snowflake/setup_git_dbt.sql).
-const DBT_EXECUTION = (process.env.DBT_EXECUTION ?? "local").toLowerCase();
-const DBT_PROJECT_OBJECT = process.env.DBT_PROJECT_OBJECT ?? "MFG_SPEND_RISK.CONFIG.MULTI_ERP_SPEND_DBT";
-if (!/^[A-Z0-9_$]+\.[A-Z0-9_$]+\.[A-Z0-9_$]+$/i.test(DBT_PROJECT_OBJECT)) throw new Error("DBT_PROJECT_OBJECT must be DB.SCHEMA.NAME");
+// Read at call time: imports are evaluated before index.ts loads .env.
+const dbtExecution = () => (process.env.DBT_EXECUTION ?? "local").toLowerCase();
+function dbtProjectObject(): string {
+  const o = process.env.DBT_PROJECT_OBJECT ?? "MFG_SPEND_RISK.CONFIG.MULTI_ERP_SPEND_DBT";
+  if (!/^[A-Z0-9_$]+\.[A-Z0-9_$]+\.[A-Z0-9_$]+$/i.test(o)) throw new Error("DBT_PROJECT_OBJECT must be DB.SCHEMA.NAME");
+  return o;
+}
 // The repo keeps one dbt virtualenv at its root, shared by every use case.
 const DBT_BIN = path.resolve(process.env.DBT_BIN ?? path.join(DBT_DIR, "../../../.venv/bin/dbt"));
 
@@ -72,9 +76,9 @@ router.get("/api/sources/preview", handle(async (req) => {
 }));
 
 // ---------------------------------------------------------------- apply (dbt build)
-interface Job { id: string; status: "running" | "done" | "error"; started: number; finished?: number; log: string[]; summary?: string; selection: Record<string, string | boolean> }
+interface Job { id: string; status: "running" | "done" | "error"; started: number; finished?: number; log: string[]; summary?: string; selection: Record<string, string | boolean>; execution: string }
 let job: Job | null = null;
-export const currentJob = () => (job ? { id: job.id, status: job.status, started: job.started, finished: job.finished, summary: job.summary, log: job.log.slice(-40), execution: DBT_EXECUTION } : null);
+export const currentJob = () => (job ? { id: job.id, status: job.status, started: job.started, finished: job.finished, summary: job.summary, log: job.log.slice(-40), execution: job.execution } : null);
 
 function validSelection(body: any): Record<string, string | boolean> {
   const out: Record<string, string | boolean> = {};
@@ -102,7 +106,7 @@ router.post("/api/sources/apply", handle(async (req) => {
   }
   await runQuery(`INSERT INTO ${DB}.CONFIG.REBUILD_LOG SELECT ?, CURRENT_TIMESTAMP(), NULL, 'RUNNING', PARSE_JSON(?), 'dbt build started'`,
                  [id, JSON.stringify(selection)]);
-  job = { id, status: "running", started: Date.now(), log: [], selection };
+  job = { id, status: "running", started: Date.now(), log: [], selection, execution: dbtExecution() };
   // Staging views and the AI_CLASSIFY category map do not depend on the selection; everything
   // downstream is rebuilt, and dynamic tables are replaced so they follow the new silver views.
   const dbtArgs = ["build", "--full-refresh", "--exclude", "staging", "int_category_map", "--vars", JSON.stringify({ selection })];
@@ -112,7 +116,8 @@ router.post("/api/sources/apply", handle(async (req) => {
     await runQuery(`UPDATE ${DB}.CONFIG.REBUILD_LOG SET FINISHED_AT = CURRENT_TIMESTAMP(), STATUS = ?, MESSAGE = ? WHERE RUN_ID = ?`,
                    [ok ? "OK" : "FAILED", message, id]).catch(console.error);
   };
-  if (DBT_EXECUTION === "snowflake") {
+  if (dbtExecution() === "snowflake") {
+    const DBT_PROJECT_OBJECT = dbtProjectObject();
     // Run the deployed dbt project object inside Snowflake. The selection comes from a closed set
     // validated above, so the JSON contains no quotes that could break the ARGS literal.
     const argsSql = dbtArgs.map((a) => (a.startsWith("{") ? `'${a}'` : a)).join(" ").replace(/'/g, "''");
@@ -120,7 +125,7 @@ router.post("/api/sources/apply", handle(async (req) => {
     runQuery(`EXECUTE DBT PROJECT ${DBT_PROJECT_OBJECT} ARGS = '${argsSql}'`)
       .then(async (rows) => {
         const r = (rows[0] ?? {}) as Record<string, unknown>;
-        const out = String(r.stdout ?? "");
+        const out = String(r.stdout ?? "").replace(/\u001b\[[0-9;]*m/g, "");
         for (const line of out.split("\n")) { const clean = line.trim(); if (clean) job!.log.push(clean); }
         const m = out.match(/Done\. (PASS=\d+ WARN=\d+ ERROR=\d+ SKIP=\d+)/);
         if (m) job!.summary = m[1];
