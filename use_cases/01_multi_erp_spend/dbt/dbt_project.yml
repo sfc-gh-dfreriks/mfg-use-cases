@@ -1,0 +1,28 @@
+name: mfg_multi_erp_spend
+version: "1.0.0"
+config-version: 2
+profile: mfg_multi_erp_spend
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+vars:
+  # Source selection. The app's Data Sources screen passes it with --vars on Apply. When it is not
+  # passed (scheduled runs, plain `dbt build`), the selection_from_config macro reads the saved
+  # selection from CONFIG.SOURCE_SELECTION. Shape: {SAP_A: ECC|S4|BW|BDC|false, ORACLE_EBS: true, ...}
+  selection: null
+
+models:
+  mfg_multi_erp_spend:
+    staging:
+      +schema: ADAPTERS
+      +materialized: view
+    intermediate:
+      +schema: SILVER
+      +materialized: view
+    marts:
+      +schema: GOLD
+      +materialized: dynamic_table
+      +target_lag: "1 day"
+      +snowflake_warehouse: COMPUTE_WH

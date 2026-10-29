@@ -1,0 +1,177 @@
+version: 2
+sources:
+- name: src_bdc_a
+  database: MFG_SPEND_RISK
+  schema: SRC_BDC_A
+  description: Native BDC_A tables, landed unchanged
+  tables:
+  - name: entryviewjournalentry
+  - name: purchasecontractitem
+  - name: purchaseorderitem
+  - name: supplier
+  - name: supplierinvoiceitem
+- name: src_bdc_b
+  database: MFG_SPEND_RISK
+  schema: SRC_BDC_B
+  description: Native BDC_B tables, landed unchanged
+  tables:
+  - name: entryviewjournalentry
+  - name: purchasecontractitem
+  - name: purchaseorderitem
+  - name: supplier
+  - name: supplierinvoiceitem
+- name: src_bw_a
+  database: MFG_SPEND_RISK
+  schema: SRC_BW_A
+  description: Native BW_A tables, landed unchanged
+  tables:
+  - name: bi0_afiap_o0300
+  - name: bi0_pvendor
+  - name: bic_azpur_o01
+  - name: bic_azpur_o02
+  - name: bic_azpur_o03
+  - name: bic_azpur_o04
+- name: src_bw_b
+  database: MFG_SPEND_RISK
+  schema: SRC_BW_B
+  description: Native BW_B tables, landed unchanged
+  tables:
+  - name: bi0_afiap_o0300
+  - name: bi0_pvendor
+  - name: bic_azpur_o01
+  - name: bic_azpur_o02
+  - name: bic_azpur_o03
+  - name: bic_azpur_o04
+- name: src_coupa
+  database: MFG_SPEND_RISK
+  schema: SRC_COUPA
+  description: Native COUPA tables, landed unchanged
+  tables:
+  - name: coupa_invoices
+  - name: coupa_purchase_orders
+  - name: coupa_suppliers
+- name: src_d365
+  database: MFG_SPEND_RISK
+  schema: SRC_D365
+  description: Native D365 tables, landed unchanged
+  tables:
+  - name: dirpartytable
+  - name: purchline
+  - name: purchtable
+  - name: vendinvoicejour
+  - name: vendinvoicetrans
+  - name: vendpackingsliptrans
+  - name: vendtable
+  - name: vendtrans
+- name: src_ecc_a
+  database: MFG_SPEND_RISK
+  schema: SRC_ECC_A
+  description: Native ECC_A tables, landed unchanged
+  tables:
+  - name: bsak
+  - name: eina
+  - name: eine
+  - name: eket
+  - name: ekko
+  - name: ekko_contract
+  - name: ekpo
+  - name: konv
+  - name: lfa1
+  - name: lfb1
+  - name: mkpf
+  - name: mseg
+  - name: rbkp
+  - name: rseg
+- name: src_ecc_b
+  database: MFG_SPEND_RISK
+  schema: SRC_ECC_B
+  description: Native ECC_B tables, landed unchanged
+  tables:
+  - name: bsak
+  - name: eina
+  - name: eine
+  - name: eket
+  - name: ekko
+  - name: ekko_contract
+  - name: ekpo
+  - name: konv
+  - name: lfa1
+  - name: lfb1
+  - name: mkpf
+  - name: mseg
+  - name: rbkp
+  - name: rseg
+- name: src_netsuite
+  database: MFG_SPEND_RISK
+  schema: SRC_NETSUITE
+  description: Native NETSUITE tables, landed unchanged
+  tables:
+  - name: item
+  - name: transaction
+  - name: transactionline
+  - name: vendor
+- name: src_oracle_ebs
+  database: MFG_SPEND_RISK
+  schema: SRC_ORACLE_EBS
+  description: Native ORACLE_EBS tables, landed unchanged
+  tables:
+  - name: ap_checks_all
+  - name: ap_invoice_lines_all
+  - name: ap_invoice_payments_all
+  - name: ap_invoices_all
+  - name: ap_suppliers
+  - name: po_headers_all
+  - name: po_line_locations_all
+  - name: po_lines_all
+  - name: rcv_transactions
+- name: src_s4_a
+  database: MFG_SPEND_RISK
+  schema: SRC_S4_A
+  description: Native S4_A tables, landed unchanged
+  tables:
+  - name: acdoca
+  - name: but000
+  - name: eina
+  - name: eine
+  - name: eket
+  - name: ekko
+  - name: ekko_contract
+  - name: ekpo
+  - name: lfa1
+  - name: lfb1
+  - name: matdoc
+  - name: prcd_elements
+  - name: rbkp
+  - name: rseg
+- name: src_s4_b
+  database: MFG_SPEND_RISK
+  schema: SRC_S4_B
+  description: Native S4_B tables, landed unchanged
+  tables:
+  - name: acdoca
+  - name: but000
+  - name: eina
+  - name: eine
+  - name: eket
+  - name: ekko
+  - name: ekko_contract
+  - name: ekpo
+  - name: lfa1
+  - name: lfb1
+  - name: matdoc
+  - name: prcd_elements
+  - name: rbkp
+  - name: rseg
+- name: src_third_party
+  database: MFG_SPEND_RISK
+  schema: SRC_THIRD_PARTY
+  description: Third-party risk, ESG, PPI and reference data
+  tables:
+  - name: dnb_supplier_risk
+  - name: esg_ratings
+  - name: fx_rates_monthly
+  - name: ppi_index
+  - name: ref_material_group
+  - name: ref_org
+  - name: sanctions_adverse_media
+  - name: subtier_risk

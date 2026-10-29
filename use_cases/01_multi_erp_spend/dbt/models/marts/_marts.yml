@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: dim_supplier
+    description: Golden supplier across every selected ERP.
+    columns:
+      - name: GOLDEN_SUPPLIER_ID
+        data_tests: [unique, not_null]
+  - name: fct_spend
+    description: PO-line spend in USD with golden supplier, normalized category, contract and maverick flags.
+    columns:
+      - name: SPEND_USD
+        data_tests: [not_null]
+      - name: GOLDEN_SUPPLIER_ID
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_supplier')
+                field: GOLDEN_SUPPLIER_ID
+  - name: dim_supplier_risk
+    columns:
+      - name: GOLDEN_SUPPLIER_ID
+        data_tests: [unique, not_null]
+      - name: RISK_TIER
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Low', 'Medium', 'High', 'Critical']

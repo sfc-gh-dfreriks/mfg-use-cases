@@ -1,0 +1,29 @@
+-- =====================================================================
+-- CONFIG: source selection written by the Data Sources screen, plus a
+-- run log. The selection is passed to dbt as --vars on every Apply.
+-- =====================================================================
+USE DATABASE MFG_SPEND_RISK;
+CREATE SCHEMA IF NOT EXISTS CONFIG;
+
+CREATE TABLE IF NOT EXISTS CONFIG.SOURCE_SELECTION (
+  SOURCE_SLOT STRING, SYSTEM_CODE STRING, ENABLED BOOLEAN,
+  UPDATED_AT TIMESTAMP_LTZ DEFAULT CURRENT_TIMESTAMP(), UPDATED_BY STRING DEFAULT CURRENT_USER());
+
+MERGE INTO CONFIG.SOURCE_SELECTION t USING (
+  SELECT * FROM VALUES ('SAP_A','ECC',TRUE), ('SAP_B','S4',TRUE), ('ORACLE_EBS','ORACLE_EBS',TRUE),
+                       ('D365','D365',TRUE), ('NETSUITE','NETSUITE',TRUE), ('COUPA','COUPA',TRUE) AS v(SOURCE_SLOT, SYSTEM_CODE, ENABLED)
+) s ON t.SOURCE_SLOT = s.SOURCE_SLOT
+WHEN NOT MATCHED THEN INSERT (SOURCE_SLOT, SYSTEM_CODE, ENABLED) VALUES (s.SOURCE_SLOT, s.SYSTEM_CODE, s.ENABLED);
+
+-- Slot descriptions shown on the Data Sources screen.
+CREATE OR REPLACE TABLE CONFIG.SOURCE_SLOT (SOURCE_SLOT STRING, LABEL STRING, KIND STRING, SCOPE STRING, ALLOWED_SYSTEMS ARRAY, SORT_ORDER INT);
+INSERT INTO CONFIG.SOURCE_SLOT
+SELECT 'SAP_A', 'SAP instance A (Americas)', 'SAP', 'Company codes 1000, 1200 · Detroit, Cleveland, Monterrey', ARRAY_CONSTRUCT('ECC','S4','BW','BDC'), 1 UNION ALL
+SELECT 'SAP_B', 'SAP instance B (Europe & Asia)', 'SAP', 'Company codes 2000, 2200 · Stuttgart, Munich, Suzhou', ARRAY_CONSTRUCT('ECC','S4','BW','BDC'), 2 UNION ALL
+SELECT 'ORACLE_EBS', 'Apex Components (acquired)', 'NON_SAP', 'Oracle EBS R12 · Houston, TX', ARRAY_CONSTRUCT('ORACLE_EBS'), 3 UNION ALL
+SELECT 'D365', 'Nordic Motion (acquired)', 'NON_SAP', 'Dynamics 365 F&O · Gothenburg, SE', ARRAY_CONSTRUCT('D365'), 4 UNION ALL
+SELECT 'NETSUITE', 'Pacific Fasteners (acquired)', 'NON_SAP', 'Oracle NetSuite · Portland, OR', ARRAY_CONSTRUCT('NETSUITE'), 5 UNION ALL
+SELECT 'COUPA', 'Coupa indirect spend', 'NON_SAP', 'Indirect P2P for all core company codes', ARRAY_CONSTRUCT('COUPA'), 6;
+
+CREATE TABLE IF NOT EXISTS CONFIG.REBUILD_LOG (RUN_ID STRING, STARTED_AT TIMESTAMP_LTZ, FINISHED_AT TIMESTAMP_LTZ, STATUS STRING,
+  SELECTION VARIANT, MESSAGE STRING);

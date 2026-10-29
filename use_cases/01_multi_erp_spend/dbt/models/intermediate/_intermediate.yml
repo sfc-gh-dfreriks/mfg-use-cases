@@ -1,0 +1,25 @@
+version: 2
+models:
+  - name: po_line
+    description: Canonical PO line, union of the selected source adapters.
+    columns:
+      - name: SOURCE_SLOT
+        data_tests: [not_null]
+      - name: PO_NUMBER
+        data_tests: [not_null]
+      - name: NET_VALUE
+        data_tests: [not_null]
+      - name: CURRENCY
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['USD', 'EUR', 'MXN', 'CNY', 'SEK']
+  - name: supplier
+    columns:
+      - name: SUPPLIER_ID
+        data_tests: [not_null]
+  - name: int_supplier_xref
+    description: Source supplier to golden supplier.
+    columns:
+      - name: GOLDEN_SUPPLIER_ID
+        data_tests: [not_null]

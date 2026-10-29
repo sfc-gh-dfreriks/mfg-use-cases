@@ -1,0 +1,22 @@
+# Python / dbt
+.venv/
+__pycache__/
+*.pyc
+**/dbt/target/
+**/dbt/logs/
+**/dbt/dbt_packages/
+**/dbt/.user.yml
+
+# Generated synthetic data (regenerate with data_gen/generate.py)
+**/data_gen/out/
+
+# Node
+node_modules/
+dist/
+
+# Local config and credentials
+.env
+*.p8
+*.pem
+
+.DS_Store
