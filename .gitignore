@@ -20,3 +20,6 @@ dist/
 *.pem
 
 .DS_Store
+
+# Runtime logs (snowflake-sdk writes snowflake.log)
+*.log
