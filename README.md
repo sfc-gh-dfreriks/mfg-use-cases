@@ -43,23 +43,17 @@ default is `dfreriksdemo`.
 
 ### Snowflake setup (dbt Projects on Snowflake)
 
-The repo is private, so Snowflake reads it through a secret holding a GitHub fine-grained personal access token with read-only
-**Contents** access to this repo:
+The repo is public, so Snowflake reads it without credentials. Run [`snowflake/setup_git_dbt.sql`](snowflake/setup_git_dbt.sql)
+once. It creates the API integration, the Git repository object `MFG_ADMIN.GIT.MFG_USE_CASES` and one dbt project object per use case.
+
+After pushing to `main`, redeploy:
 
 ```sql
-USE ROLE ACCOUNTADMIN;
-CREATE DATABASE IF NOT EXISTS MFG_ADMIN; CREATE SCHEMA IF NOT EXISTS MFG_ADMIN.GIT;
-CREATE OR REPLACE SECRET MFG_ADMIN.GIT.GITHUB_PAT TYPE = PASSWORD USERNAME = '<github user>' PASSWORD = '<token>';
+ALTER GIT REPOSITORY MFG_ADMIN.GIT.MFG_USE_CASES FETCH;
+ALTER DBT PROJECT MFG_SPEND_RISK.CONFIG.MULTI_ERP_SPEND_DBT ADD VERSION
+  FROM '@MFG_ADMIN.GIT.MFG_USE_CASES/branches/main/use_cases/01_multi_erp_spend/dbt';
 ```
 
-Then run [`snowflake/setup_git_dbt.sql`](snowflake/setup_git_dbt.sql).
+To test uncommitted changes, deploy from a stage instead: `python3 framework/tools/deploy_dbt.py use_cases/01_multi_erp_spend MFG_SPEND_RISK.CONFIG.MULTI_ERP_SPEND_DBT`.
 
-Until that secret exists, deploy a use case's dbt project from a stage instead. No Git credentials are needed:
-
-```bash
-python3 framework/tools/deploy_dbt.py use_cases/01_multi_erp_spend MFG_SPEND_RISK.CONFIG.MULTI_ERP_SPEND_DBT
-```
-
-This is how `MULTI_ERP_SPEND_DBT` is deployed today (dbt 1.12.3, stage `@MFG_ADMIN.DBT.PROJECTS`). It creates the API integration, the Git repository object
-`MFG_ADMIN.GIT.MFG_USE_CASES` and one dbt project object per use case. Each use case runs inside Snowflake with
-`EXECUTE DBT PROJECT`, and its app can use that path with `DBT_EXECUTION=snowflake`.
+Each use case runs inside Snowflake with EXECUTE DBT PROJECT`, and its app can use that path with `DBT_EXECUTION=snowflake`.
