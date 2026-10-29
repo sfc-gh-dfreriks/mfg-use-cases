@@ -15,7 +15,7 @@ All data is **synthetic**. Supplier risk, sanctions, ESG, sub-tier and PPI figur
 | Bronze | `MFG_SPEND_RISK.SRC_*` | Native source tables, landed unchanged: 13 schemas, ~940k rows (see below) |
 | dbt staging | `MFG_SPEND_RISK.ADAPTERS` | 69 adapter views, one per source system × instance × canonical object |
 | Silver | `MFG_SPEND_RISK.SILVER` | 7 canonical objects (union of the *selected* adapters), golden-supplier cross-reference, AI_CLASSIFY category map |
-| Gold | `MFG_SPEND_RISK.GOLD` | Dynamic tables: `FCT_SPEND`, `FCT_PRICE_VARIANCE`, `FCT_THREE_WAY_MATCH`, `FCT_PAYMENT`, `DIM_SUPPLIER`, `DIM_SUPPLIER_RISK`, `MART_SOURCE_COVERAGE` |
+| Gold | `MFG_SPEND_RISK.GOLD` | Dynamic tables: `FCT_SPEND`, `FCT_PRICE_VARIANCE`, `FCT_THREE_WAY_MATCH`, `FCT_PAYMENT`, `DIM_SUPPLIER`, `DIM_SUPPLIER_RISK`; tables `MART_SOURCE_COVERAGE`, `MART_SUPPLIER_OPPORTUNITY`, `MART_SUPPLIER_ISSUES` |
 | Semantic | `MFG_SPEND_RISK.SEMANTIC.MULTI_ERP_SPEND` | Semantic view over the gold marts |
 | Agent | `MFG_SPEND_RISK.AGENTS.MULTI_ERP_SPEND_ANALYST` | Cortex Agent (Cortex Analyst tool), in Snowflake Intelligence |
 | App | `app/` | React + Express, same design as the SAP BDC 360 apps; server 3013, client 5188 |
@@ -44,12 +44,43 @@ contracts. See [`docs/source_mapping.md`](docs/source_mapping.md).
 3. **Spend by Supplier**: concentration and suppliers bought from in several ERPs.
 4. **Price Variance Across Plants**: same material, same quarter, premium over the best plant, contract and PPI.
 5. **Supplier Risk**: composite risk tier, sanctions, ESG, sub-tier, region.
-6. **Contracts & Maverick Spend**.
-7. **3-Way Match & Payments**: PO vs GR vs invoice exceptions, days to pay, lost early-payment discounts.
-8. **Supplier Golden Record**: cross-ERP deduplication by tax ID, D-U-N-S, then normalized name + country.
-9. **Data Sources**: choose the system type behind each instance, turn sources on and off, preview native tables, see per-object coverage,
+6. **Supplier Optimization**: scenario modelling and Cortex recommendations (see below).
+7. **Contracts & Maverick Spend**.
+8. **3-Way Match & Payments**: PO vs GR vs invoice exceptions, days to pay, lost early-payment discounts.
+9. **Supplier Golden Record**: cross-ERP deduplication by tax ID, D-U-N-S, then normalized name + country.
+10. **Data Sources**: choose the system type behind each instance, turn sources on and off, preview native tables, see per-object coverage,
    and **Apply**, which runs `dbt build` with the selection.
-10. **Sources & Lineage (dbt)**: the dbt DAG from the manifest, per canonical object, with unselected adapters greyed out.
+11. **Sources & Lineage (dbt)**: the dbt DAG from the manifest, per canonical object, with unselected adapters greyed out.
+
+## Supplier optimization
+
+All figures are trailing 12 months (Oct 2025 to Sep 2026).
+
+- **Scenario Builder**: eight levers over `GOLD.MART_SUPPLIER_OPPORTUNITY` (one row per category). The levers cover:
+  - price harmonization to the best plant
+  - maverick spend moved to contract, with a contract discount
+  - tail consolidation, with a volume discount (tail = suppliers outside the top 80% of category spend)
+  - shifting spend off High/Critical suppliers, with a switching-cost premium
+  - capturing lost early-payment discounts
+
+  `app/server/src/routes/optimize.ts` applies the levers in sequence. Price comes first, and the other levers apply to the spend that remains,
+  so nothing is double counted. With all levers at 0 the scenario equals the baseline. Scenarios are saved in `CONFIG.SUPPLIER_SCENARIOS`.
+- **Issues & Remedies**: `GOLD.MART_SUPPLIER_ISSUES` holds rule-based findings, each with a severity, the dollars at stake, a standard remedy and
+  evidence. The issue types are:
+  - sanctions exposure
+  - high-risk concentration
+  - single-source sub-tier
+  - supplier fragmentation
+  - maverick spend
+  - plant price premium
+  - payment-terms mismatch across ERPs
+  - lost early-pay discounts
+
+  **Cortex remedy** sends one issue's evidence to `AI_COMPLETE`. It returns a diagnosis, ordered steps with owners and timelines, ERP actions,
+  KPIs and risks.
+- **Cortex Recommendation**: Cortex reads the category opportunities, the top issues and your current levers, and proposes a lever set with a
+  rationale for each lever, plus priority actions, quick wins and trade-offs. Its lever values are clamped to the allowed ranges. The scenario
+  model, not Cortex, computes the savings total. **Apply to builder** loads the levers into the sliders.
 
 ## How the source selection works
 

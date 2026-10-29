@@ -19,7 +19,13 @@ CREATE OR REPLACE SEMANTIC VIEW MFG_SPEND_RISK.SEMANTIC.MULTI_ERP_SPEND
       COMMENT = 'Average USD price per material, plant and quarter vs the best plant, the contract price and the PPI commodity index.',
     PAYMENT AS MFG_SPEND_RISK.GOLD.FCT_PAYMENT PRIMARY KEY (SOURCE_SLOT, INVOICE_ID)
       WITH SYNONYMS = ('payments', 'accounts payable', 'AP')
-      COMMENT = 'Supplier payments: days to pay, late payments and early-payment discounts taken or lost.'
+      COMMENT = 'Supplier payments: days to pay, late payments and early-payment discounts taken or lost.',
+    OPPORTUNITY AS MFG_SPEND_RISK.GOLD.MART_SUPPLIER_OPPORTUNITY PRIMARY KEY (CATEGORY)
+      WITH SYNONYMS = ('optimization', 'savings opportunity', 'consolidation', 'category opportunity')
+      COMMENT = 'Per category, trailing 12 months (Oct 2025 to Sep 2026): suppliers, tail suppliers (outside the top 80% of spend), concentration, maverick, price harmonization and high-risk spend.',
+    ISSUE AS MFG_SPEND_RISK.GOLD.MART_SUPPLIER_ISSUES PRIMARY KEY (ISSUE_ID)
+      WITH SYNONYMS = ('issues', 'supplier issues', 'findings', 'remedies')
+      COMMENT = 'Rule-based supplier issues with severity, dollars at stake (trailing 12 months) and the standard remedy.'
   )
   RELATIONSHIPS (
     SPEND_TO_SUPPLIER AS SPEND (GOLDEN_SUPPLIER_ID) REFERENCES SUPPLIER (GOLDEN_SUPPLIER_ID),
@@ -45,7 +51,17 @@ CREATE OR REPLACE SEMANTIC VIEW MFG_SPEND_RISK.SEMANTIC.MULTI_ERP_SPEND
     PAYMENT.DAYS_TO_PAY AS DAYS_TO_PAY COMMENT = 'Days from invoice to payment.',
     PAYMENT.DAYS_LATE AS DAYS_LATE COMMENT = 'Days paid after the due date (negative = early).',
     PAYMENT.DISCOUNT_TAKEN_USD AS DISCOUNT_TAKEN_USD COMMENT = 'Early-payment discount taken, USD.',
-    PAYMENT.DISCOUNT_LOST_USD AS DISCOUNT_LOST_USD COMMENT = 'Early-payment discount offered (2/10 net 30) but not taken, USD.'
+    PAYMENT.DISCOUNT_LOST_USD AS DISCOUNT_LOST_USD COMMENT = 'Early-payment discount offered (2/10 net 30) but not taken, USD.',
+    OPPORTUNITY.CATEGORY_SPEND_12M_USD AS SPEND_12M_USD COMMENT = 'Category spend, trailing 12 months, USD.',
+    OPPORTUNITY.CATEGORY_SUPPLIERS AS SUPPLIERS COMMENT = 'Golden suppliers used in the category.',
+    OPPORTUNITY.TAIL_SUPPLIERS AS TAIL_SUPPLIERS COMMENT = 'Suppliers outside the group covering the top 80% of category spend.',
+    OPPORTUNITY.TAIL_SPEND_USD AS TAIL_SPEND_USD COMMENT = 'Spend with tail suppliers, USD.',
+    OPPORTUNITY.TOP_SUPPLIER_SHARE AS TOP_SUPPLIER_SHARE COMMENT = 'Largest supplier share of category spend (0.3 = 30%).',
+    OPPORTUNITY.HHI AS HHI COMMENT = 'Herfindahl-Hirschman concentration index, 0-10000.',
+    OPPORTUNITY.CATEGORY_MAVERICK_USD AS MAVERICK_SPEND_USD COMMENT = 'Off-contract spend in the category, USD.',
+    OPPORTUNITY.PRICE_HARMONIZATION_USD AS PRICE_HARMONIZATION_USD COMMENT = 'Savings if every plant paid the best plant price, last four quarters, USD.',
+    OPPORTUNITY.CATEGORY_HIGH_RISK_USD AS HIGH_RISK_SPEND_USD COMMENT = 'Spend with High or Critical suppliers in the category, USD.',
+    ISSUE.IMPACT_USD AS IMPACT_USD COMMENT = 'Dollars at stake for the issue, trailing 12 months.'
   )
   DIMENSIONS (
     SPEND.SOURCE_SYSTEM AS SOURCE_SYSTEM WITH SYNONYMS = ('ERP', 'source system') COMMENT = 'ERP the line came from, e.g. SAP ECC 6.0, SAP S/4HANA, Oracle EBS R12.',
@@ -82,7 +98,15 @@ CREATE OR REPLACE SEMANTIC VIEW MFG_SPEND_RISK.SEMANTIC.MULTI_ERP_SPEND
     PAYMENT.PAYMENT_SOURCE_SYSTEM AS SOURCE_SYSTEM COMMENT = 'ERP the payment came from.',
     PAYMENT.PAYMENT_TERMS AS PAYMENT_TERMS COMMENT = 'Payment terms, e.g. NT30, NT60, 2/10N30.',
     PAYMENT.PAYMENT_MONTH AS PAYMENT_MONTH COMMENT = 'First day of the payment month.',
-    PAYMENT.IS_LATE AS IS_LATE WITH SYNONYMS = ('late payment') COMMENT = 'TRUE if paid after the due date.'
+    PAYMENT.IS_LATE AS IS_LATE WITH SYNONYMS = ('late payment') COMMENT = 'TRUE if paid after the due date.',
+    OPPORTUNITY.OPP_CATEGORY AS CATEGORY COMMENT = 'Spend category of the optimization opportunity.',
+    OPPORTUNITY.TOP_SUPPLIER AS TOP_SUPPLIER COMMENT = 'Largest supplier in the category.',
+    ISSUE.ISSUE_TYPE AS ISSUE_TYPE COMMENT = 'SANCTIONS_EXPOSURE, HIGH_RISK_CONCENTRATION, SINGLE_SOURCE_SUBTIER, SUPPLIER_FRAGMENTATION, MAVERICK_SPEND, PLANT_PRICE_PREMIUM, PAYMENT_TERMS_MISMATCH, LOST_EARLY_PAY_DISCOUNT.',
+    ISSUE.SEVERITY AS SEVERITY COMMENT = 'Critical, High or Medium.',
+    ISSUE.ENTITY_TYPE AS ENTITY_TYPE COMMENT = 'Supplier, Category, Plant or ERP.',
+    ISSUE.ENTITY AS ENTITY COMMENT = 'The supplier, category, plant or ERP the issue is about.',
+    ISSUE.SUMMARY AS SUMMARY COMMENT = 'One-line finding.',
+    ISSUE.STANDARD_REMEDY AS STANDARD_REMEDY COMMENT = 'Standard remedy for the issue type.'
   )
   METRICS (
     SPEND.TOTAL_SPEND_USD AS SUM(SPEND.SPEND_USD) COMMENT = 'Total spend, USD.',
@@ -97,6 +121,11 @@ CREATE OR REPLACE SEMANTIC VIEW MFG_SPEND_RISK.SEMANTIC.MULTI_ERP_SPEND
     PAYMENT.TOTAL_PAID_USD AS SUM(PAYMENT.AMOUNT_USD) COMMENT = 'Total paid, USD.',
     PAYMENT.AVG_DAYS_TO_PAY AS AVG(PAYMENT.DAYS_TO_PAY) COMMENT = 'Average days from invoice to payment.',
     PAYMENT.LATE_PAYMENT_RATE AS AVG(IFF(PAYMENT.IS_LATE, 1, 0)) COMMENT = 'Share of payments made after the due date.',
-    PAYMENT.TOTAL_DISCOUNT_LOST_USD AS SUM(PAYMENT.DISCOUNT_LOST_USD) COMMENT = 'Early-payment discounts lost, USD.'
+    PAYMENT.TOTAL_DISCOUNT_LOST_USD AS SUM(PAYMENT.DISCOUNT_LOST_USD) COMMENT = 'Early-payment discounts lost, USD.',
+    OPPORTUNITY.TOTAL_TAIL_SPEND_USD AS SUM(OPPORTUNITY.TAIL_SPEND_USD) COMMENT = 'Tail spend (consolidation base), trailing 12 months, USD.',
+    OPPORTUNITY.TOTAL_PRICE_HARMONIZATION_USD AS SUM(OPPORTUNITY.PRICE_HARMONIZATION_USD) COMMENT = 'Price harmonization opportunity, USD.',
+    OPPORTUNITY.TOTAL_TAIL_SUPPLIERS AS SUM(OPPORTUNITY.TAIL_SUPPLIERS) COMMENT = 'Tail supplier-category relationships.',
+    ISSUE.ISSUE_COUNT AS COUNT(ISSUE.ISSUE_ID) COMMENT = 'Number of open issues.',
+    ISSUE.TOTAL_IMPACT_USD AS SUM(ISSUE.IMPACT_USD) COMMENT = 'Dollars at stake across issues (one dollar can appear under several issues), USD.'
   )
-  COMMENT = 'Multi-ERP Spend & Supplier Risk: global spend by golden supplier, price variance across plants, supplier risk and payment performance, independent of source ERP.';
+  COMMENT = 'Multi-ERP Spend & Supplier Risk: global spend by golden supplier, price variance across plants, supplier risk, payment performance, optimization opportunities and supplier issues, independent of source ERP.';

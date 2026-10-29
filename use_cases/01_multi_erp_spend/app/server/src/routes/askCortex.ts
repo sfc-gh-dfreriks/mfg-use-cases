@@ -55,6 +55,14 @@ const TOPICS: Record<string, { title: string; facts: Facts }> = {
                             FROM ${PRICE} WHERE ${LATEST} GROUP BY 1 ORDER BY 4 DESC LIMIT 12`),
     commodity_index_change_since_2024: await T(`SELECT PPI_SERIES, ROUND(100 * (AVG(PPI_FACTOR) - 1), 1) pct_change FROM ${PRICE} WHERE QUARTER >= '2026-07-01' GROUP BY 1 ORDER BY 2 DESC`),
   }) },
+  optimize: { title: "supplier optimization: consolidation, price harmonization, maverick-to-contract, de-risking and the open issue list (trailing 12 months)", facts: async () => ({
+    categories: await T(`SELECT CATEGORY, ROUND(SPEND_12M_USD) spend_usd, SUPPLIERS, TAIL_SUPPLIERS, ROUND(TAIL_SPEND_USD) tail_spend_usd, TOP_SUPPLIER,
+                         ROUND(100 * TOP_SUPPLIER_SHARE, 1) top_share_pct, HHI, ROUND(MAVERICK_SPEND_USD) maverick_usd, ROUND(PRICE_HARMONIZATION_USD) price_savings_usd,
+                         ROUND(HIGH_RISK_SPEND_USD) high_risk_usd, ROUND(SINGLE_SOURCE_SUBTIER_SPEND_USD) single_source_usd
+                         FROM MFG_SPEND_RISK.GOLD.MART_SUPPLIER_OPPORTUNITY ORDER BY SPEND_12M_USD DESC`),
+    issues_by_type: await T(`SELECT ISSUE_TYPE, COUNT(*) issues, ROUND(SUM(IMPACT_USD)) impact_usd FROM MFG_SPEND_RISK.GOLD.MART_SUPPLIER_ISSUES GROUP BY 1 ORDER BY 3 DESC`),
+    top_issues: await T(`SELECT ISSUE_TYPE, SEVERITY, ENTITY, IMPACT_USD, SUMMARY, STANDARD_REMEDY FROM MFG_SPEND_RISK.GOLD.MART_SUPPLIER_ISSUES ORDER BY SEVERITY_RANK, IMPACT_USD DESC LIMIT 20`),
+  }) },
   risk: { title: "supplier risk: financial, sanctions, ESG and sub-tier (representative third-party data)", facts: async () => ({
     tiers: await T(`SELECT r.RISK_TIER, COUNT(DISTINCT r.GOLDEN_SUPPLIER_ID) suppliers, ROUND(SUM(s.SPEND_USD)) spend_usd FROM ${SPEND} s JOIN ${SUP} r USING (GOLDEN_SUPPLIER_ID) GROUP BY 1`),
     critical_and_high: await T(`SELECT SUPPLIER_NAME, COUNTRY, RISK_TIER, RISK_SCORE, ROUND(SPEND_USD) spend_usd, FAILURE_CLASS, ESG_SCORE, SANCTIONS_HIT, WATCHLIST,

@@ -1,8 +1,8 @@
-import { LayoutDashboard, Truck, Scale, ShieldAlert, FileCheck2, Receipt, Fingerprint, Database, GitBranch, Check, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Truck, Scale, ShieldAlert, FileCheck2, Receipt, Fingerprint, Database, GitBranch, Check, Sparkles, Target } from 'lucide-react';
 import { useFilters } from '@/hooks/useFilters';
 import { cn } from '@/lib/utils';
 
-export type PageId = 'ask-cortex' | 'overview' | 'suppliers' | 'price-variance' | 'supplier-risk' | 'contracts' | 'match-payments'
+export type PageId = 'ask-cortex' | 'overview' | 'suppliers' | 'price-variance' | 'supplier-risk' | 'supplier-optimization' | 'contracts' | 'match-payments'
   | 'golden-record' | 'data-sources' | 'lineage';
 
 export interface NavItem { id: PageId; label: string; icon: React.ElementType; }
@@ -13,6 +13,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'suppliers', label: 'Spend by Supplier', icon: Truck },
   { id: 'price-variance', label: 'Price Variance Across Plants', icon: Scale },
   { id: 'supplier-risk', label: 'Supplier Risk', icon: ShieldAlert },
+  { id: 'supplier-optimization', label: 'Supplier Optimization', icon: Target },
   { id: 'contracts', label: 'Contracts & Maverick Spend', icon: FileCheck2 },
   { id: 'match-payments', label: '3-Way Match & Payments', icon: Receipt },
   { id: 'golden-record', label: 'Supplier Golden Record', icon: Fingerprint },

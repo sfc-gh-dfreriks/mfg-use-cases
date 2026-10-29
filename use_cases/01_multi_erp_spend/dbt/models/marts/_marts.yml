@@ -26,3 +26,18 @@ models:
           - accepted_values:
               arguments:
                 values: ['Low', 'Medium', 'High', 'Critical']
+  - name: mart_supplier_opportunity
+    description: Category-level optimization levers on trailing-12-month spend (tail, maverick, price, risk).
+    columns:
+      - name: CATEGORY
+        data_tests: [unique, not_null]
+  - name: mart_supplier_issues
+    description: Rule-based supplier issues with severity, dollar impact, standard remedy and evidence for Cortex.
+    columns:
+      - name: ISSUE_ID
+        data_tests: [unique, not_null]
+      - name: SEVERITY
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Critical', 'High', 'Medium']

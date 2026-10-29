@@ -7,6 +7,7 @@ import Overview from '@/pages/Overview';
 import Suppliers from '@/pages/Suppliers';
 import PriceVariance from '@/pages/PriceVariance';
 import SupplierRisk from '@/pages/SupplierRisk';
+import SupplierOptimization from '@/pages/SupplierOptimization';
 import Contracts from '@/pages/Contracts';
 import MatchPayments from '@/pages/MatchPayments';
 import GoldenRecord from '@/pages/GoldenRecord';
@@ -19,6 +20,7 @@ const ASK: Record<string, { topic: string; suggestions: string[] }> = {
   suppliers: { topic: 'suppliers', suggestions: ['Is our supplier base too concentrated?', 'Which top suppliers have low contract coverage?'] },
   'price-variance': { topic: 'price', suggestions: ['Which plant pays the most above the best price?', 'Where is price variance not explained by commodity indices?'] },
   'supplier-risk': { topic: 'risk', suggestions: ['Which high-spend suppliers are the biggest risk?', 'How exposed are we to single-source sub-tier suppliers?'] },
+  'supplier-optimization': { topic: 'optimize', suggestions: ['Which three actions would save the most without adding supply risk?', 'Where should we consolidate suppliers, and where should we dual-source instead?'] },
   contracts: { topic: 'contracts', suggestions: ['Where is maverick spend highest?', 'Which suppliers should we put under contract first?'] },
   'match-payments': { topic: 'match', suggestions: ['Where are three-way match exceptions concentrated?', 'How much early-payment discount are we losing?'] },
   'golden-record': { topic: 'golden', suggestions: ['How reliable is the supplier deduplication?', 'Which suppliers do we buy from in several ERPs?'] },
@@ -31,6 +33,7 @@ const PAGE_COMPONENTS: Record<PageId, React.FC<{ onNavigate?: (p: PageId) => voi
   suppliers: Suppliers,
   'price-variance': PriceVariance,
   'supplier-risk': SupplierRisk,
+  'supplier-optimization': SupplierOptimization,
   contracts: Contracts,
   'match-payments': MatchPayments,
   'golden-record': GoldenRecord,
